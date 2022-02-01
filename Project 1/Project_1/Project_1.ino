@@ -73,6 +73,10 @@ void setup() {
 }
 
 //**MAIN LOOP**
+//highly possible we don't even use this since it will be "solid state"...
+//see what exactly on a hardware level this code does(????)
+//is there any benefit to using this other than our own stuff(??)
+//specifically for the sleep mode
 void loop() {
   // put your main code here, to run repeatedly:
 
