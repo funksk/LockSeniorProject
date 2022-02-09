@@ -60,6 +60,9 @@ void MdelUser();
 void MlistUser();
 void MsysOptions();
 void Msleep();
+
+void initMasterData()
+
 //menu specific functions
 //LCD
 
@@ -70,7 +73,7 @@ void Msleep();
 //lock
 
 //sd card
-
+void checkfolder();
 //re-used menu functions
 //LCD
 
@@ -128,6 +131,21 @@ check if there is a master user, if there is,
 boot into the menu or sleep function.
 */
 void initialFunc()
+{
+	if(!checkfolder())	//if the folder doesn't exist 
+	{
+		initMasterData();	//we init the data
+	}
+	//
+	
+}
+
+void checkfolder()
+{
+
+}
+
+void initMasterData()
 {
 
 }
