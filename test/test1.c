@@ -24,7 +24,7 @@ a lot like C.
 also, Andrew sucks at naming things. if that bugs you
 then just change it, but make sure its for everything
 master always precedes user. idk, it just makes sense
-we will breaks... for loops... I'm sorry... I H8 flags
+we will user breaks for loops... I'm sorry... I H8 flags
 it makes shit more confusing
 
 links:
@@ -62,7 +62,12 @@ typedef struct
 {
 	char name[50];
 	char fingprint[1000];
-} users;
+} oneUser;
+
+typedef struct
+{
+	oneUser[USERAMNT]
+} users;	//quite silly, but this makes life easier between functions
 
 //**********global variables***********
 struct termios tmios;
@@ -74,19 +79,19 @@ struct termios tmios;
 //AND PASSING PARAMETERS. NOTHING IS FINAL (PROBABLY EVER)!
 
 //MAIN FUNCTION DEFINITIONS
-void initialFunc(mastUser*, users*);
+void initialFunc();
 //menu functions
-void Mmain(mastUser, users[]);
+void Mmain(mastUser, users);
 
-void Munlock(mastUser, users[]);
-void Mregister(mastUser, users[]);
-void MdelUser(mastUser, users[]);
-void MlistUser(mastUser, users[]);
-void MsysOptions(mastUser, users[]);
-void Msleep(mastUser, users[]);
+void Munlock(mastUser, users);
+void Mregister(mastUser, users);
+void MdelUser(mastUser, users);
+void MlistUser(mastUser, users);
+void MsysOptions(mastUser, users);
+void Msleep(mastUser, users);
 
-void initMasterData(mastUser);
-void initUserData(users[]);
+mastUser initMasterData();
+users initUserData();
 
 //menu specific functions
 //LCD
@@ -140,17 +145,19 @@ void lock();
 //most likely, these functions will be from a library
 //I'll define a few that may just roll shit up from a 
 //library into a nice and neat function
+mastUser loadMasterData();
+users loadUserData();
 void saveUser();
 void readUser();
 //we don't need a compare, this will be dealt with by other things
 
 int main(int argc, char *argv[])
 {
-	//TODO: make into state machine
-	users user[USERAMNT];
-	mastUser master;
+	//todo: INITILIZE PERIPHERALS
+	//HAVE INDIVIDUAL FUNCTIONS FOR INITING
+	//MAKE SOME GLOBAL VARS IF WE HAVE TO!!
 	flipecho(1);
-	printf("Initializing lock program TESTTESTTEST!!!V0.01\n");
+	printf("******LOCK PROGRAM PROOF OF CONCEPT C++*********\n");
 	initialFunc(master, user);
 	return 0;
 }
@@ -162,24 +169,27 @@ int main(int argc, char *argv[])
 //check if there is a master user, if there is,
 //boot into the menu or sleep function.
 
-void initialFunc(mastUser *master, users *user)
+void initialFunc()
 {
+	mastUser master;
+	users user;
 	if(!checkfolder())	//if the folder doesn't exist 
 	{
-		initMasterData(master);	//we init the data
-		initUserData(user);	//init default user data
+		master = initMasterData();	//we init the data
+		user = initUserData(user);	//init default user data
 	}
 	else
 	{
-		
+		master = loadMasterData();
+		user = loadUserData();
 	}
 	
 	//if the master data exists, or we successfully entered it, continue
 	Mmain(master, user);
 }
 
-//
-void Mmain(mastUser master, users user[USERAMNT])
+//**********MAIN MENU LOOP**********
+void Mmain(mastUser master, users user)
 {
 	int choice = 0;
 	char c;
@@ -215,7 +225,7 @@ void Mmain(mastUser master, users user[USERAMNT])
 		//TODO: all of this is command line shit... change
 		//into embedded shits later...
 		//add if pressed enter, enter function with user commands...
-		//j = 0x6A, left, l = 0x6C
+		//j = 0x6A, left, l = 0x6C, k = 0x6B
 		//cout << "hello!\n";
 		c = getchar();
 		fflush(stdin);	//remove this garbage crap
@@ -294,6 +304,8 @@ void Mmain(mastUser master, users user[USERAMNT])
 		}
 	}
 }
+
+//****************MENU ITEMS!!*****************
 //scan data
 //did they scan correct data?
 //	yes: continue
@@ -356,18 +368,33 @@ int checkfolder()
 	return 0;
 }
 
-
-
+mastUser loadMasterData()
+{
+	mastUser m;
+	printf("in loadMasterData\n");
+	//open file/folder with master data in it
+	//grab them into m
+}
+users loadUserData()
+{
+	users u;
+	printf("in loadUserData\n");
+	//open file/folder with all user's data in it
+	//grab them into u
+}
 
 //***********RE-USABLE GENERAL FUNCTIONS************
-void initMasterData(mastUser master)
+
+mastUser initMasterData()
 {
+	mastUser master;
 	printf("enter master name\n");
 	getUserName(master.name);
 	printf("enter master pin\n");
 	getPin(master.pin);
 	printf("scan master fingerprint\n");
 	getFingerPrint(master.fingprint);
+	return master;
 }
 
 void getUserName(char *x)
