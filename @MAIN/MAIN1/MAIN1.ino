@@ -103,6 +103,7 @@ typedef struct
 
 //MAIN FUNCTION DEFINITIONS
 void initialFunc();
+void initPorts();
 //menu functions
 void Mmain(mastUser, users);
 
@@ -184,7 +185,8 @@ void setup()
 	//todo: INITILIZE PERIPHERALS
 	//HAVE INDIVIDUAL FUNCTIONS FOR INITING
 	//MAKE SOME GLOBAL VARS IF WE HAVE TO!!
-	Serial.print("******LOCK PROGRAM PROOF OF CONCEPT C++*********\n");
+	Serial.print("******LOCK PROGRAM V0.1*********\n");
+	initPorts();
 	initialFunc();
 }
 
@@ -194,6 +196,10 @@ void setup()
 //if there is a master PIN at the front of the SD card,
 //check if there is a master user, if there is,
 //boot into the menu or sleep function.
+void initPorts()
+{
+
+}
 
 void initialFunc()
 {
@@ -253,7 +259,7 @@ void Mmain(mastUser master, users user)
 		}
 #endif
 		//get input here
-
+		digitalRead();
 
 		//TODO: CHANGE GETTING STUFF!!!!
 #if ISKEYPAD
