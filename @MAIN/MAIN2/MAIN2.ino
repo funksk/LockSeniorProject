@@ -47,7 +47,7 @@ https://aticleworld.com/state-machine-using-c/
 //LCD includes
 #include <LiquidCrystal.h>
 //Keypad includes
-//#include <Keypad.h>
+#include <Keypad.h>
 //fingerprint sensor includes
 //this one's external and must be included. not sure how to yet tho.
 
@@ -63,7 +63,7 @@ https://aticleworld.com/state-machine-using-c/
 #define WAITTIME 5
 #define USERAMNT 2
 
-#define ISLCD 0
+#define ISLCD 1
 #define ISSD 1
 #define ISFPRINT 0
 #define ISKEYPAD 0
@@ -104,15 +104,7 @@ typedef struct
 //MAIN FUNCTION DEFINITIONS
 void initialFunc();
 void initPorts();
-//menu functions
-void Mmain(mastUser, users);
 
-void Munlock(mastUser, users);
-void Mregister(mastUser, users);
-void MdelUser(mastUser, users);
-void MlistUser(mastUser, users);
-void MsysOptions(mastUser, users);
-void Msleep(mastUser, users);
 
 mastUser initMasterData();
 users initUserData();
@@ -145,8 +137,7 @@ int checkfolder();
 //note: if a function does something related to a perripheral
 //just list it under the perripheral
 //LCD
-//these functions will probably be built-into a library
-//if we want to do a cute lock animation, do it here lol
+void printLCD(char*);
 
 //keypad
 void getUserName(char*);
@@ -174,6 +165,43 @@ void saveUser();
 void readUser();
 //we don't need a compare, this will be dealt with by other things
 
+//menu functions
+
+void Munlock(mastUser, users);
+void Mregister(mastUser, users);
+void MdelUser(mastUser, users);
+void MlistUser(mastUser, users);
+void MsysOptions(mastUser, users);
+void Msleep(mastUser, users);
+
+void Mmain(mastUser, users);
+
+
+//******peripheral global vars and classes******
+//LCD
+//        reset    enable   d4       d5       d6       d7
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+LiquidCrystal lcd(rs,en,d4,d5,d6,d7);
+//Keypad
+const int ROW_NUM = 4; //four rows
+const int COLUMN_NUM = 3; //three columns
+//so COL2, ROW1, COL1, ROW4, COL3, ROW3, ROW2
+//   38    39    40    41    42    43    44
+char keys[ROW_NUM][COLUMN_NUM] = {
+  {'1','2','3'},
+  {'4','5','6'},
+  {'7','8','9'},
+  {'*','0','#'}
+};
+byte pin_rows[ROW_NUM] = {39,44,43,41}; //connect to the row pinouts of the keypad
+byte pin_column[COLUMN_NUM] = {40,38,42}; //connect to the column pinouts of the keypad
+Keypad keypad = Keypad( makeKeymap(keys), pin_rows, pin_column, ROW_NUM, COLUMN_NUM );
+//SD card
+
+//fingerprint
+
+//lock
+
 void loop() {
   // This will never get called. that's okay!
 	return;
@@ -192,15 +220,19 @@ void setup()
 
 //*******MAIN DELEGATION FUNCTIONS***********
 
+void initPorts()
+{
+	//DEBUG serial
+	Serial.begin(9600);
+	//LCD
+	lcd.begin(16,2);
+	lcd.print("Welcome to lock program");
+}
+
 //check if anything is initialized on SD card...
 //if there is a master PIN at the front of the SD card,
 //check if there is a master user, if there is,
 //boot into the menu or sleep function.
-void initPorts()
-{
-
-}
-
 void initialFunc()
 {
 	mastUser master;
@@ -236,45 +268,46 @@ void Mmain(mastUser master, users user)
 		//3 = deluser
 		//4 = sysoptions
 		//TODO: make better, not cout
-#if ISLCD
-
-#else
+		lcd.setCursor(0,1);
+		lcd.print(c);
 		switch(choice)
 		{
 			case 0:
-				Serial.print("unlock\n");
+				printLCD("Unlock");
 				break;
 			case 1:
-				Serial.print("register\n");
+				printLCD("Register");
 				break;
 			case 2:
-				Serial.print("listuser\n");
+				printLCD("ListUser");
 				break;
 			case 3:
-				Serial.print("deluser\n");
+				printLCD("DelUser");
 				break;
 			case 4:
-				Serial.print("sysoptions\n");
+				printLCD("SysOptions");
 				break;
 		}
-#endif
+		
 		//get input here
-		//digitalRead();
+		
+		c = keypad.getKey();
+		while(keypad.isPressed(c) == false)
+			c = keypad.getKey();
 
 		//TODO: CHANGE GETTING STUFF!!!!
-#if ISKEYPAD
 		switch(choice)
 		{
 			case 0:		//unlock
 				switch(c)
 				{
-					case 0x6A:
+					case '#':
 						choice = 4;
 						break;
-					case 0x6C:
+					case '*':
 						choice = 1;
 						break;
-					case 0x6B:
+					case 0x30:
 						Munlock(master, user);
 						break;
 				}
@@ -282,13 +315,13 @@ void Mmain(mastUser master, users user)
 			case 1:		//register
 				switch(c)
 				{
-					case 0x6A:
+					case '#':
 						choice = 0;
 						break;
-					case 0x6C:
+					case '*':
 						choice = 2;
 						break;
-					case 0x6B:
+					case 0x30:
 						Mregister(master, user);
 						break;
 				}
@@ -296,13 +329,13 @@ void Mmain(mastUser master, users user)
 			case 2:		//listuser
 				switch(c)
 				{
-					case 0x6A:
+					case '#':
 						choice = 1;
 						break;
-					case 0x6C:
+					case '*':
 						choice = 3;
 						break;
-					case 0x6B:
+					case 0x30:
 						MlistUser(master, user);
 						break;
 				}
@@ -310,13 +343,13 @@ void Mmain(mastUser master, users user)
 			case 3:		//deluser
 				switch(c)
 				{
-					case 0x6A:
+					case '#':
 						choice = 2;
 						break;
-					case 0x6C:
+					case '*':
 						choice = 4;
 						break;
-					case 0x6B:
+					case 0x30:
 						MdelUser(master, user);
 						break;
 				}
@@ -324,21 +357,19 @@ void Mmain(mastUser master, users user)
 			case 4:		//sysoptions
 				switch(c)
 				{
-					case 0x6A:
+					case '#':
 						choice = 3;
 						break;
-					case 0x6C:
+					case '*':
 						choice = 0;
 						break;
-					case 0x6B:
+					case 0x30:
 						MsysOptions(master, user);
 						break;
 				}
 				break;
 		}
-#else
 
-#endif
 	}
 }
 
@@ -350,7 +381,7 @@ void Mmain(mastUser master, users user)
 //does it match anything in our system?
 //	yes: unlock door for a few secs
 //	no: dump back to menu
-void Munlock(mastUser master, users user[USERAMNT])
+void Munlock(mastUser master, users user)
 {
 	int choice = 0;
 	char curFingerData[1000];
@@ -358,6 +389,8 @@ void Munlock(mastUser master, users user[USERAMNT])
 	Serial.print("in Munlock\n");
 	Serial.print("scan fingerprint now\n");
 	getFingerPrint(curFingerData);
+	printLCD('fartts!!');
+	delay(5000);
 
 }
 
@@ -366,7 +399,7 @@ void Munlock(mastUser master, users user[USERAMNT])
 //scan data
 //make sure scanned data is good
 //retry until done
-void Mregister(mastUser master, users user[USERAMNT])
+void Mregister(mastUser master, users user)
 {
 	Serial.print("in Mregister\n");
 }
@@ -378,20 +411,20 @@ void Mregister(mastUser master, users user[USERAMNT])
 //	yes: delete user, goto menu
 //	no: goto menu
 //give a few tries here
-void MdelUser(mastUser master, users user[USERAMNT])
+void MdelUser(mastUser master, users user)
 {
 	Serial.print("MdelUser\n");
 }
 
 //enter PIN
 //list all users that exist
-void MlistUser(mastUser master, users user[USERAMNT])
+void MlistUser(mastUser master, users user)
 {
 	Serial.print("MlistUser\n");
 }
 
 //authenticate master user
-void MsysOptions(mastUser master, users user[USERAMNT])
+void MsysOptions(mastUser master, users user)
 {
 	Serial.print("MsysOptions\n");
 
@@ -412,6 +445,7 @@ mastUser loadMasterData()
 	//open file/folder with master data in it
 	//grab them into m
 }
+
 users loadUserData()
 {
 	users u;
@@ -443,14 +477,42 @@ void getUserName(char *x)
 {
 	char c;
 	Serial.print("in getUserName");	//DEBUG
-	c = getchar();	//DEBUG
 }
 
+//should we make it 4 or more numbers? yes...
 void getPin(char *x)
 {
 	char c;
+	char pin[4] = "";
+	int num = 0, enter = 0;
 	Serial.print("in getPin");	//DEBUG
-	c = getchar();
+	printLCD("Enter PIN");
+	while(enter == 0)
+	{
+		c = keypad.getKey();
+		while(keypad.isPressed(c) == false)
+			c = keypad.getKey();
+		if(c == '*')	//backspace
+		{
+			//get rid of pin from number
+			lcd.setCursor(1,num);
+			lcd.write(' ');
+			num--;
+		}
+		else if(c == '#')	//enter
+		{
+			if(num > 3)	//if at least 4 nums has been entered
+				enter = 1;
+		}
+		else	//number
+		{	//TODO don't echo the pin out to the user
+			strcat(pin,c);
+			lcd.setCursor(1,num);
+			lcd.write(c);
+			num++;
+		}
+	}
+	strcpy(x,pin);
 }
 
 void getFingerPrint(char *x)
@@ -461,3 +523,11 @@ void getFingerPrint(char *x)
 }
 
 
+//********RE-USABLE PERIPHERAL PHUNCTIONS**********
+
+void printLCD(char* x)
+{
+	lcd.clear();
+	lcd.setCursor(0,0);
+	lcd.print(x);
+}
