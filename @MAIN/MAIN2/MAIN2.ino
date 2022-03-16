@@ -13,28 +13,31 @@ THINGS TO KEEP IN MIND:
 ~leave no stone unturned. make this readable code (except when prototyping of course)
 
 TODO:
-*how to implement an overall timer into this
-*program to constantly be counting down all of
-the time until there is some input...
-will have to figure this out 
-*every main function may have to have a while loop inside of it which will
-be testing for sleep condition.
-*must be able to break out of sleep condition when button pressed
-*make all of the get and set functions be able to return
-acknowledgement of passing or failing
-*make sure data flow is good, so we don't have to mess with it later
+~finish implementing PIN in
+~make a conceptual character input thing for pin
+~make main branches complete with funcitons and menu entries
+~save things, read, compare them with SD card
+~implement sleep function at any input screen
+	~every menu where we get input (make a getinput function??)
+	~every pin entrypoint
+	~every letter entrypoint
+	~every thumbprint entrypoint
+~comparing of fingerprints
+
+~create schematic for power board
+~create schematic for switch for lock mechanism
 
 CODE PRACTICES:
-we will not be including the BOOL type, as it just
+~we will not be including the BOOL type, as it just
 defines 1 as True, and 0 as False from a short - 
 just use a short with 1 or 0 dood.
-Andrew does not know how c++ works, so this will be
+~Andrew does not know how c++ works, so this will be
 a lot like C.
-also, Andrew sucks at naming things. if that bugs you
+~also, Andrew sucks at naming things. if that bugs you
 then just change it, but make sure its for everything
-master always precedes user. idk, it just makes sense
-we will user breaks for loops... I'm sorry... I H8 flags
-it makes shit more confusing
+~master always precedes user. idk, it just makes sense
+~use whatever loop works best, and we can use breaks.
+this isn't pyzdrowski's class lol
 
 links:
 https://aticleworld.com/state-machine-using-c/
@@ -56,6 +59,7 @@ https://aticleworld.com/state-machine-using-c/
 //sd card slot includes
 #include <SPI.h>
 #include <SD.h>
+
 //misc includes
 
 
